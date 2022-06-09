@@ -1,0 +1,9 @@
+{
+  "name": "web3Wallet",
+  "version": "1.0.0",
+  "dependencies": {
+  },
+  "scripts": {
+    "server": "live-server --port=9090 --open=src"
+  }
+}

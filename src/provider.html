@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="static/ethers-v4.min.js"></script>
+</head>
+<body>
+
+</body>
+
+<script>
+    let defaultProvider = ethers.getDefaultProvider('ropsten');
+    console.log(defaultProvider)
+
+    // 连接本地的geth 节点，8545是geth 的端口
+    // let provider = new ethers.providers.JsonRpcProvider("http://127.0.0.1:8545");
+
+    // wallet 为前两篇文章中生成的钱包对象, activeWallet就是后面可以用来请求余额发送交易的对象
+    let privateKey = "0x46fd89465c1731ee3f9ac82376ba1e51424057b8f87eea9e9304fcd8ceb3d931";
+
+    let wallet = new ethers.Wallet(privateKey, defaultProvider);
+
+    wallet.getBalance().then(function (balance) {
+        console.log("钱包：[" + wallet.address + "]的余额为" + balance);
+    });
+
+    wallet.getTransactionCount().then(function (transactionCount) {
+        console.log("钱包：[" + wallet.address + "]的交易数量为" + transactionCount);
+    });
+
+
+</script>
+
+</html>

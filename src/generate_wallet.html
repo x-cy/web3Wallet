@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>my web3 wallet</title>
+    <script src="static/ethers-v4.min.js"></script>
+    <style>
+        body {
+            text-align: center;
+        }
+
+        table {
+            border: 1px solid #000000;
+        }
+
+        div {
+            text-align: center;
+            margin: 100px auto;
+            display: inline-block;
+        }
+
+        th, td {
+            width: 600px;
+            text-align: left;
+            padding-left: 20px;
+            height: 50px;
+            border: 1px solid #000000;
+        }
+
+        th:first-child, td:first-child {
+            width: 200px;
+            text-align: right;
+            padding-right: 20px;
+        }
+
+        input {
+            height: 30px;
+            line-height: 30px;
+            width: 500px;
+        }
+    </style>
+</head>
+<body>
+
+<div>
+    <table>
+        <tr>
+            <td>助记词：</td>
+            <td><input id="txt_mnemonic"/></td>
+        </tr>
+        <tr>
+            <td>私钥：</td>
+            <td><input id="txt_privateKey"/></td>
+        </tr>
+        <tr>
+            <td>账号地址：</td>
+            <td><input id="txt_address"/></td>
+        </tr>
+        <tr>
+            <td>Path：</td>
+            <td><input id="txt_path"/></td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                <button onclick="method_01()">生成钱包01</button>
+                <button onclick="method_02()">生成钱包02</button>
+                <button onclick="method_03()">生成钱包03</button>
+                <button onclick="method_04()">生成钱包04</button>
+                <button onclick="method_05()">生成钱包05</button>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="2" style="text-align: left;">
+                <ol>
+                    <li>通过私钥生成一个钱包</li>
+                    <li>通过JSON文件导入生成一个钱包,这方法太慢</li>
+                    <li>手动生成随机数后,调用wallet方法生成钱包地址,此方法没有助记词</li>
+                    <li>创建一个随机钱包</li>
+                    <li>先生成助记词,再生成钱包</li>
+                </ol>
+                <span>注意：创建（或导入）钱包账号的过程都是是离线的，即不需要依赖以太坊网络即可创建钱包账号，只要按照相应规则则可以被认为是有效的钱包</span>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+<script>
+
+    // 注意：创建（或导入）钱包账号的过程都是是离线的，即不需要依赖以太坊网络即可创建钱包账号，只要按照相应规则则可以被认为是有效的钱包
+
+    // 通过私钥生成一个钱包
+    function method_01() {
+        let privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
+        let wallet = new ethers.Wallet(privateKey);
+        let address = wallet.address;
+        let mnemonic = wallet.mnemonic;
+        let path = wallet.path
+        displayData(mnemonic, privateKey, address, path);
+    }
+
+    // 通过JSON文件导入生成一个钱包,这方法太慢
+    function method_02() {
+        let data = {
+            id: "fb1280c0-d646-4e40-9550-7026b1be504a",
+            address: "88a5c2d9919e46f883eb62f7b8dd9d0cc45bc290",
+            Crypto: {
+                kdfparams: {
+                    dklen: 32,
+                    p: 1,
+                    salt: "bbfa53547e3e3bfcc9786a2cbef8504a5031d82734ecef02153e29daeed658fd",
+                    r: 8,
+                    n: 262144
+                },
+                kdf: "scrypt",
+                ciphertext: "10adcc8bcaf49474c6710460e0dc974331f71ee4c7baa7314b4a23d25fd6c406",
+                mac: "1cf53b5ae8d75f8c037b453e7c3c61b010225d916768a6b145adf5cf9cb3a703",
+                cipher: "aes-128-ctr",
+                cipherparams: {
+                    iv: "1dcdf13e49cea706994ed38804f6d171"
+                }
+            },
+            "version": 3
+        };
+        let json = JSON.stringify(data);
+        let password = "foo";
+        console.log("开始导入...")
+        ethers.Wallet.fromEncryptedJson(json, password).then(function (wallet) {
+            console.log("导入完成...")
+            let privateKey = wallet.privateKey;
+            let address = wallet.address;
+            let mnemonic = wallet.mnemonic;
+            let path = wallet.path
+            displayData(mnemonic, privateKey, address, path);
+        });
+    }
+
+    // 手动生成随机数后,调用wallet方法生成钱包地址,此方法没有助记词
+    function method_03() {
+        let privateKey = ethers.utils.bigNumberify(ethers.utils.randomBytes(32));
+        let wallet = new ethers.Wallet(privateKey);
+        let address = wallet.address;
+        let mnemonic = wallet.mnemonic;
+        let path = wallet.path
+        displayData(mnemonic, privateKey, address, path);
+    }
+
+    // 创建一个随机钱包
+    function method_04() {
+        let wallet = ethers.Wallet.createRandom();
+        let privateKey = wallet.privateKey;
+        let address = wallet.address;
+        let mnemonic = wallet.mnemonic;
+        let path = wallet.path
+        displayData(mnemonic, privateKey, address, path);
+    }
+
+    // 先生成助记词,再生成钱包
+    function method_05() {
+        let mnemonic = ethers.utils.HDNode.entropyToMnemonic(ethers.utils.randomBytes(16));
+        let path = "m/44'/60'/0'/0/0";
+        let wallet = ethers.Wallet.fromMnemonic(mnemonic, path);
+        let privateKey = wallet.privateKey;
+        let address = wallet.address;
+        displayData(mnemonic, privateKey, address, path);
+    }
+
+    function displayData(mnemonic, privateKey, address, path) {
+        document.getElementById("txt_mnemonic").value = !mnemonic ? "无" : mnemonic;
+        document.getElementById("txt_privateKey").value = privateKey;
+        document.getElementById("txt_address").value = address;
+        document.getElementById("txt_path").value = !path ? "无" : path;
+    }
+
+</script>
+</html>
